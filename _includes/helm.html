@@ -1,0 +1,10 @@
+{% for el in site.data.index.entries %}
+<h2>{{ el[0] }}</h2>
+{% for a in el[1] %}
+<div>
+    <p>{{ a.description }}</p>
+    <div>Version: {{ a.version }} </div>
+    <pre><code>helm install kandy/{{ a.name }}</code></pre>
+</div>
+{% endfor %}
+{% endfor %}
