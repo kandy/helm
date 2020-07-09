@@ -1,6 +1,6 @@
 .PHONY: build
 build:
 	helm lint src/*
-	helm package --destination assets src/*
+	helm package --destination repo/files src/*
 	helm repo index repo
-	git add assets
+	git add repo

@@ -9,5 +9,12 @@ helm repo list
 ```
 
 {% for el in site.data.index.entries %}
-  <p>{{ el }}</p>
+    <h3>{{ el[0] }}</h3>
+    {% for a in el[1] %}
+        <div>
+            <p>{{ a.description }}</p>
+            <div>Version: {{ a.version }} </div>
+            <pre><code>helm install kandy/{{ a.name }}</code></pre>
+        </div>
+    {% endfor %}    
 {% endfor %}

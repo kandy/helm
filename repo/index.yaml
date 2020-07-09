@@ -1,3 +1,26 @@
 apiVersion: v1
-entries: {}
-generated: "2020-07-08T23:11:57.072018-05:00"
+entries:
+  mariadb-galera-cluster:
+  - apiVersion: v1
+    appVersion: "10.4"
+    created: "2020-07-08T23:43:57.409482-05:00"
+    description: MySQL with Galera Replication (xtradb)
+    digest: f90d3622a22f9e0d9dea831f971b3f65e82496069745232549b0da0043722589
+    home: https://github.com/kandy/helm
+    keywords:
+    - mysql
+    - mariadb
+    - database
+    - sql
+    - galera
+    - wsrep
+    maintainers:
+    - email: Andrii.Kasian@gmail.com
+      name: kandy
+    name: mariadb-galera-cluster
+    sources:
+    - https://github.com/kandy/helm
+    urls:
+    - files/mariadb-galera-cluster-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-07-08T23:43:57.407799-05:00"
