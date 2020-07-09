@@ -7,9 +7,10 @@ helm repo add kandy https://kandy.github.io/helm/repo
 helm repo update
 helm repo list
 ```
-
+git
+# Package List
 {% for el in site.data.index.entries %}
-    <h3>{{ el[0] }}</h3>
+    ##{{ el[0] }}
     {% for a in el[1] %}
         <div>
             <p>{{ a.description }}</p>
