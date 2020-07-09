@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "mariadb-galera-cluster.fullname" . }}-repl"
+  labels:
+    app: {{ template "mariadb-galera-cluster.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  ports:
+  - name: galera
+    port: 4567
+  - name: state-xfer
+    port: 4568
+  - name: state-snap
+    port: 4444
+  selector:
+    app: {{ template "mariadb-galera-cluster.fullname" . }}
+    release: "{{ .Release.Name }}"

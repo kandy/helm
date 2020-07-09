@@ -1,0 +1,188 @@
+apiVersion: {{ template "mariadb-galera-cluster.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "mariadb-galera-cluster.fullname" . }}
+  labels:
+    app: {{ template "mariadb-galera-cluster.fullname" . }}
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ template "mariadb-galera-cluster.fullname" . }}
+      release: "{{ .Release.Name }}"
+  serviceName: {{ template "mariadb-galera-cluster.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "mariadb-galera-cluster.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+    {{- end }}
+    spec:
+      securityContext:
+        runAsUser: 100
+        fsGroup: 101
+      containers:
+      - name: database
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
+        securityContext:
+          capabilities:
+            add:
+              - SYS_NICE
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        env:
+        {{- if .Values.mysqlAllowEmptyPassword }}
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "true"
+        {{- else }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "mariadb-galera-cluster.fullname" . }}
+              key: mysql-root-password
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "mariadb-galera-cluster.fullname" . }}
+              key: mysql-password
+        {{- end }}
+        - name: MARIABACKUP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "mariadb-galera-cluster.fullname" . }}
+              key: mariabackup-password
+        - name: MYSQL_USER
+          value: {{ default "" .Values.mysqlUser | quote }}
+        - name: MYSQL_DATABASE
+          value: {{ default "" .Values.mysqlDatabase | quote }}
+        - name: ALLOW_ROOT_FROM
+          value: {{ .Values.allowRootFrom | quote }}
+        - name: CLUSTER_NAME
+          value: {{ template "mariadb-galera-cluster.fullname" . }}
+        - name: SHORT_CLUSTER_NAME
+          value: {{ template "mariadb-galera-cluster.shortname" . }}
+        - name: K8S_SERVICE_NAME
+          value: {{ template "mariadb-galera-cluster.fullname" . }}-repl
+        - name: DEBUG
+          value: ""
+        ports:
+        - name: mysql
+          containerPort: 3306
+        - name: galera-repl
+          containerPort: 4567
+        - name: state-transfer
+          containerPort: 4568
+        - name: state-snapshot
+          containerPort: 4444
+        livenessProbe:
+          exec:
+            command: 
+              - bash
+              - -c
+              - |
+                mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        readinessProbe:
+          exec:
+            command: ["mysql", "-umonitor", "-pmonitor", "-h", "127.0.0.1", "-e", "SHOW GLOBAL STATUS LIKE 'wsrep_local_state';"]
+          initialDelaySeconds: 10
+          timeoutSeconds: 8
+        volumeMounts:
+        {{- if .Values.persistence.enabled }}
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        {{ end }}
+        - name: mysql-config-files
+          mountPath: /etc/my.cnf.d
+        - name: slash-root
+          mountPath: /root
+        - name: var-log
+          mountPath: /var/log
+        {{- if .Values.ssl.enabled }}
+        - name: certificates
+          mountPath: /ssl
+        {{- end }}
+      {{ if .Values.logTail }}
+      - name: "logs"
+        image: "alpine"
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "echo > /var/log/mysqld.log && tail -f /var/log/mysqld.log"
+        volumeMounts:
+        - name: var-log
+          mountPath: /var/log
+      {{ end }}
+      {{ if .Values.metricsExporter.enabled }}
+      - name: metrics
+        {{- if .Values.metricsExporter.tag }}
+        image: "prom/mysqld-exporter:{{ .Values.metricsExporter.tag }}"
+        {{- else }}
+        image: prom/mysqld-exporter
+        {{- end }}
+        imagePullPolicy: IfNotPresent
+{{- if .Values.metricsExporter.commandOverrides }}
+        command:
+{{ toYaml .Values.metricsExporter.commandOverrides | indent 8 }}
+{{- end }}
+{{- if .Values.metricsExporter.argsOverrides }}
+        args:
+{{ toYaml .Values.metricsExporter.argsOverrides | indent 8 }}
+{{- end }}
+        ports:
+        - name: metrics
+          containerPort: 9104
+        volumeMounts:
+        - name: slash-root
+          mountPath: /root
+        livenessProbe:
+          exec:
+            command: ["wget","-q","-O","-","localhost:9104"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 2
+        readinessProbe:
+          exec:
+            command: ["wget","-q","-O","-","localhost:9104"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 2
+      {{ end }}
+      volumes:
+      - name: slash-root
+        emptyDir: {}
+      - name: var-log
+        emptyDir: {}
+      - name: mysql-config-files
+        configMap:
+          name: {{ template "mariadb-galera-cluster.fullname" . }}-config-files
+      {{- if not .Values.persistence.enabled }}
+      - name: mysql-data
+        emptyDir: {}
+      {{- else }}
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: {{ template "mariadb-galera-cluster.fullname" . }}-data
+      {{- end -}}
+      {{- if .Values.ssl.enabled }}
+      - name: certificates
+        secret:
+          secretName: {{ .Values.ssl.secret }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end -}}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end -}}
+
