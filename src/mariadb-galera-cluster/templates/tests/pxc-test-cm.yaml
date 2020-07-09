@@ -4,7 +4,7 @@ metadata:
   name: {{ template "mariadb-galera-cluster.fullname" . }}-tests
 data:
   run.sh: |-
-    echo "Testing Percona XtraDB Cluster"
+    echo "Testing MariaDB Galera Cluster"
     creds="-uroot -p${MYSQL_ROOT_PASSWORD} -h {{ template "mariadb-galera-cluster.fullname" . }}"
     echo "==> basic mysql ping"
     mysqladmin $creds ping

@@ -16,8 +16,8 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{/*
-Create a short cluster name in order to fulfill Percona's `wsrep_cluster_name` variable max size.
-https://www.percona.com/doc/mariadb-galera-cluster/LATEST/wsrep-system-index.html#wsrep_cluster_name
+Create a short cluster name in order to fulfill `wsrep_cluster_name` variable max size.
+https://mariadb.com/kb/en/galera-cluster-system-variables/#wsrep_cluster_name
 */}}
 {{- define "mariadb-galera-cluster.shortname" -}}
 {{- $name := default "mgc" .Values.nameOverride -}}

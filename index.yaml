@@ -3,9 +3,9 @@ entries:
   mariadb-galera-cluster:
   - apiVersion: v1
     appVersion: "10.4"
-    created: "2020-07-08T19:59:37.920609-05:00"
+    created: "2020-07-08T23:04:31.547242-05:00"
     description: MySQL with Galera Replication (xtradb)
-    digest: 28abbd1fa364581e004ca97133600b2aee326a536561ffaf294f809a8cc193d0
+    digest: a3d9472f6d40ea5b1d0a576e373b6171bc38008dc09ff2149c68aed8a8a047d9
     home: https://github.com/kandy/helm
     keywords:
     - mysql
@@ -21,6 +21,6 @@ entries:
     sources:
     - https://github.com/kandy/helm
     urls:
-    - files/mariadb-galera-cluster-0.1.0.tgz
+    - assets/mariadb-galera-cluster-0.1.0.tgz
     version: 0.1.0
-generated: "2020-07-08T19:59:37.919071-05:00"
+generated: "2020-07-08T23:04:31.546294-05:00"

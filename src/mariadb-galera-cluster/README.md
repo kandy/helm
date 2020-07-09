@@ -1,18 +1,15 @@
-# Percona XtraDB Cluster
+# MariaDB Galera Cluster
 
-[Percona Server](https://MySQL.org) for MySQL® is a free, fully compatible, enhanced, open source drop-in replacement for MySQL that provides superior performance, scalability and instrumentation. With over 3,000,000 downloads, Percona Server for MySQL's self-tuning algorithms and support for extremely high-performance hardware delivers excellent performance and reliability.
-
-Notable users include Netflix, Amazon Web Services, Alcatel-Lucent, and Smug Mug.
 
 ## Introduction
 
-This chart, based off of the Percona chart (which in turn is based off the MySQL chart), bootstraps a multi-node Percona XtraDB Cluster deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart, based off of the Percona chart (which in turn is based off the MySQL chart), bootstraps a multi-node MariaDB Galera Cluster deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 The chart exploits the deterministic nature of StatefulSet and KubeDNS to ensure the cluster bootstrap is performed in the correct order.
 
 ## Prerequisites
 
-- Kubernetes 1.8+ with Beta APIs enabled
+- Kubernetes 1.16+ 
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
@@ -20,10 +17,10 @@ The chart exploits the deterministic nature of StatefulSet and KubeDNS to ensure
 To install the chart with the release name `my-release`:
 
 ```bash
-$ helm install --name my-release stable/mariadb-galera-cluster
+$ helm install  my-release kandy/mariadb-galera-cluster
 ```
 
-The command deploys a Percona XtraDB Cluster on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
+The command deploys a MariaDB Galera Cluster on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
 The root password can only be used inside each `pod`.  You should set a default `mysqlDatabase`, `mysqlUser` and `mysqlPassword` in the values.yaml file.
 
@@ -32,7 +29,7 @@ in the values.yaml.
 
 You can retrieve your root password (usable only via localhost in each pod) by running the following command. Make sure to replace [YOUR_RELEASE_NAME]:
 
-    printf $(printf '\%o' `kubectl get secret [YOUR_RELEASE_NAME]-percona -o jsonpath="{.data.mysql-root-password[*]}"`)
+    printf $(printf '\%o' `kubectl get secret [YOUR_RELEASE_NAME]-mysql -o jsonpath="{.data.mysql-root-password[*]}"`)
 
 > **Tip**: List all releases using `helm list`
 
@@ -41,24 +38,24 @@ You can retrieve your root password (usable only via localhost in each pod) by r
 To uninstall/delete the `my-release` deployment:
 
 ```bash
-$ helm delete my-release
+$ helm uninstall my-release
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Configuration
 
-The following table lists the configurable parameters of the Percona chart and their default values.
+The following table lists the configurable parameters of the chart and their default values.
 
 | Parameter                  | Description                        | Default                                                    |
 | -----------------------    | ---------------------------------- | ---------------------------------------------------------- |
-| `image.repository`         | `mariadb-galera-cluster` image Repo.                 | 5.7.19 release                                        |
-| `image.tag`                 | `mariadb-galera-cluster` image tag.                 | `percona/mariadb-galera-cluster` |
+| `image.repository`         | `mariadb-galera-cluster` image Repo.                 | `kandy/mgc`                                        |
+| `image.tag`                 | `mariadb-galera-cluster` image tag.                 | `latest` |
 | `image.pullPolicy`          | Image pull policy                  | `IfNotPresent` |
-| `replicas`                 | Number of pods to join the Percona XtraDB Cluster   | 3                                         |
+| `replicas`                 | Number of pods to join the MariaDB Galera Cluster   | 3                                         |
 | `allowRootFrom`            | Remote hosts to allow root access, set to `127.0.0.1` to disable remote root  | `%` |
-| `mysqlRootPassword`        | Password for the `root` user.      | `not-a-secure-password`                                                      |
-| `mariabackupPassword`       | Password for the `mariabackup` user. | `replicate-my-data` |
+| `mysqlRootPassword`        | Password for the `root` user.      | If not set, random will be generated                                                      |
+| `mariabackupPassword`       | Password for the `mariabackup` user. | If not set, random will be generated |
 | `mysqlUser`                | Username of new user to create.    | `nil`                                                      |
 | `mysqlPassword`            | Password for the new user.         | `nil`                                                      |
 | `mysqlDatabase`            | Name for new database to create.   | `nil`                                                      |
@@ -91,17 +88,16 @@ The following table lists the configurable parameters of the Percona chart and t
 | `prometheus.operator.serviceMonitor.namespace` | Namespace which Prometheus is installed in                         | `nil`   |
 | `prometheus.operator.serviceMonitor.selector`  | Label Selector for Prometheus to find ServiceMonitors              | `nil`   |
 | `podDisruptionBudget` | Pod disruption budget | `{enabled: false, maxUnavailable: 1}` |
-| `service.percona.headless` | if set to true makes the percona service [headless](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) | false |
+| `service.mysql.headless` | if set to true makes the mysql service [headless](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) | false |
 
 
-Some of the parameters above map to the env variables defined in the [Percona XtraDB Cluster DockerHub image](https://hub.docker.com/r/percona/mariadb-galera-cluster/).
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
 $ helm install --name my-release \
   --set mysqlRootPassword=secretpassword,mysqlUser=my-user,mysqlPassword=my-password,mysqlDatabase=my-database \
-    stable/mariadb-galera-cluster
+    kandy/mariadb-galera-cluster
 ```
 
 The above command sets the MySQL `root` account password to `secretpassword`. Additionally it creates a standard database user named `my-user`, with the password `my-password`, who has access to a database named `my-database`.
@@ -109,18 +105,16 @@ The above command sets the MySQL `root` account password to `secretpassword`. Ad
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install --name my-release -f values.yaml stable/mariadb-galera-cluster
+$ helm install --name my-release -f values.yaml kandy/mariadb-galera-cluster
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
 
 ## Persistence
 
-The [Percona XtraDB Cluster DockerHub image](https://hub.docker.com/r/percona/mariadb-galera-cluster/) stores the MySQL data and configurations at the `/var/lib/mysql` path of the container.
+The [image](https://hub.docker.com/repository/docker/mrkandy/mgc) stores the MySQL data and configurations at the `/var/lib/mysql` path of the container.
 
-By default, an emptyDir volume is mounted at that location.
-
-> *"An emptyDir volume is first created when a Pod is assigned to a Node, and exists as long as that Pod is running on that node. When a Pod is removed from a node for any reason, the data in the emptyDir is deleted forever."*
+By default, a data stored inside of container.
 
 You can change the values.yaml to enable persistence and use a PersistentVolumeClaim instead.
 

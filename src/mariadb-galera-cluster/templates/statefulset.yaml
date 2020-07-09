@@ -89,8 +89,9 @@ spec:
               - -c
               - |
                 mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 10
         readinessProbe:
           exec:
             command: ["mysql", "-umonitor", "-pmonitor", "-h", "127.0.0.1", "-e", "SHOW GLOBAL STATUS LIKE 'wsrep_local_state';"]

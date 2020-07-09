@@ -1,11 +1,11 @@
-# Default values for Percona XtraDB Cluster
+# Default values
 
-## percona image and version
-## ref: https://hub.docker.com/r/percona/mariadb-galera-cluster/tags/
+## mysql image and version
+
 image:
   repository: "mrkandy/mgc"
   tag: "latest"
-  pullPolicy: Always
+  # pullPolicy: Always
 
 # Desired number of members of xtradb cluster
 replicas: 3
@@ -39,7 +39,7 @@ allowRootFrom: "%"
 ## Persist data to a persistent volume
 persistence:
   enabled: false
-  ## percona data Persistent Volume Storage Class
+  ## mysql data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
   ## If undefined (the default) or set to null, no storageClassName spec is
@@ -159,8 +159,8 @@ podDisruptionBudget:
   # minAvailable: 1
   maxUnavailable: 1
 
-## Set the percona kubernetes service headless (no load-balancing)
+## Set the mysql kubernetes service headless (no load-balancing)
 ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
 service:
-  percona:
+  mysql:
     headless: false
