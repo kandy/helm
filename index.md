@@ -8,5 +8,5 @@ helm repo update
 helm repo list
 ```
 
-# Package List
+## Package List
 {%- include helm.html -%}

@@ -32,10 +32,10 @@ spec:
       - name: database
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
-        securityContext:
-          capabilities:
-            add:
-              - SYS_NICE
+{{/*        securityContext:*/}}
+{{/*          capabilities:*/}}
+{{/*            add:*/}}
+{{/*              - SYS_NICE*/}}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         env:
