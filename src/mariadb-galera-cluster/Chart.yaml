@@ -16,4 +16,4 @@ maintainers:
 name: mariadb-galera-cluster
 sources:
 - https://github.com/kandy/helm
-version: 0.2.0
+version: 0.2.1

@@ -27,7 +27,7 @@ spec:
     spec:
       securityContext:
         runAsUser: 100
-        fsGroup: 101
+        fsGroup: 100
       containers:
       - name: database
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
