@@ -25,9 +25,9 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
     {{- end }}
     spec:
-      securityContext:
-        runAsUser: 100
-        fsGroup: 100
+{{/*      securityContext:*/}}
+{{/*        runAsUser: 100*/}}
+{{/*        fsGroup: 100*/}}
       containers:
       - name: database
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -82,16 +82,16 @@ spec:
           containerPort: 4568
         - name: state-snapshot
           containerPort: 4444
-        livenessProbe:
-          exec:
-            command: 
-              - bash
-              - -c
-              - |
-                mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress
-          initialDelaySeconds: 10
-          timeoutSeconds: 10
-          periodSeconds: 10
+{{/*        livenessProbe:*/}}
+{{/*          exec:*/}}
+{{/*            command: */}}
+{{/*              - bash*/}}
+{{/*              - -c*/}}
+{{/*              - |*/}}
+{{/*                mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress*/}}
+{{/*          initialDelaySeconds: 10*/}}
+{{/*          timeoutSeconds: 10*/}}
+{{/*          periodSeconds: 10*/}}
         readinessProbe:
           exec:
             command: ["mysql", "-umonitor", "-pmonitor", "-h", "127.0.0.1", "-e", "SHOW GLOBAL STATUS LIKE 'wsrep_local_state';"]
