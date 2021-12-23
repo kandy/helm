@@ -82,21 +82,24 @@ spec:
           containerPort: 4568
         - name: state-snapshot
           containerPort: 4444
-{{/*        livenessProbe:*/}}
-{{/*          exec:*/}}
-{{/*            command: */}}
-{{/*              - bash*/}}
-{{/*              - -c*/}}
-{{/*              - |*/}}
-{{/*                mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress*/}}
-{{/*          initialDelaySeconds: 10*/}}
-{{/*          timeoutSeconds: 10*/}}
-{{/*          periodSeconds: 10*/}}
+        livenessProbe:
+          exec:
+            command:
+              - bash
+              - -c
+              - |
+                mysql -umonitor -pmonitor -h 127.0.0.1 -e "SELECT 1" || test -e /var/lib/mysql/sst_in_progress
+          initialDelaySeconds: 5
+          timeoutSeconds: 9
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
         readinessProbe:
           exec:
             command: ["mysql", "-umonitor", "-pmonitor", "-h", "127.0.0.1", "-e", "SHOW GLOBAL STATUS LIKE 'wsrep_local_state';"]
           initialDelaySeconds: 10
-          timeoutSeconds: 8
+          timeoutSeconds: 4
+          periodSeconds: 5
         volumeMounts:
         {{- if .Values.persistence.enabled }}
         - name: mysql-data
